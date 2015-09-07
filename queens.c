@@ -75,7 +75,7 @@ print_solution(int grid_size,
         uint32_t values[n_values];
         struct queen queens[grid_size];
         struct queen *sorted_queens[grid_size];
-        int x, y;
+        int x, y, i;
 
         memset(values, 0, n_values * sizeof values[0]);
 
@@ -105,11 +105,14 @@ print_solution(int grid_size,
 
         for (y = 0; y < grid_size; y++) {
                 printf(" * %c", xdigit(y * 16 / grid_size));
-                for (x = 0; x < grid_size; x++)
-                        printf(" %c",
-                               queens[x].y == y ?
-                               xdigit(queens[x].sequence) :
-                               ' ');
+                for (x = 0; x < grid_size; x++) {
+                        if (queens[x].y == y) {
+                                for (i = 0; i < x; i++)
+                                        fputs("  ", stdout);
+                                printf(" %c", xdigit(queens[x].sequence));
+                                break;
+                        }
+                }
                 fputc('\n', stdout);
         }
 
