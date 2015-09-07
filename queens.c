@@ -153,9 +153,9 @@ search(int grid_size)
 
         stack[0].next_row = 0;
 
-        memset(row_mask, 0, sizeof forward_diagonal_mask);
+        memset(row_mask, 0, sizeof row_mask);
         memset(forward_diagonal_mask, 0, sizeof forward_diagonal_mask);
-        memset(back_diagonal_mask, 0, sizeof forward_diagonal_mask);
+        memset(back_diagonal_mask, 0, sizeof back_diagonal_mask);
 
         while (true) {
                 x = stack_size - 1;
