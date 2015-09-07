@@ -4,6 +4,9 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
+#include <float.h>
+#include <limits.h>
+#include <math.h>
 
 struct stack_entry {
         int next_row;
@@ -12,6 +15,11 @@ struct stack_entry {
 struct queen {
         int x, y;
         int sequence;
+};
+
+struct solution_state {
+        struct queen *queens;
+        float total_nearest_distance;
 };
 
 static void
@@ -69,7 +77,7 @@ compare_queen_center_distance(const void *a,
 
 static void
 print_solution(int grid_size,
-               const struct stack_entry *stack)
+               const struct queen *queens_in)
 {
         int n_values = (grid_size + 3) / 4;
         uint32_t values[n_values];
@@ -81,7 +89,7 @@ print_solution(int grid_size,
 
         for (x = 0; x < grid_size; x++) {
                 queens[x].x = x - grid_size / 2;
-                queens[x].y = stack[x].next_row - 1 - grid_size / 2;
+                queens[x].y = queens_in[x].y - grid_size / 2;
                 sorted_queens[x] = queens + x;
         }
 
@@ -138,6 +146,49 @@ print_solution(int grid_size,
 }
 
 static void
+handle_solution(int grid_size,
+                const struct stack_entry *stack,
+                struct solution_state *solution_state)
+{
+        struct queen queens[grid_size];
+        int nearest_distance2;
+        int distance2;
+        float total_nearest_distance = 0;
+        int dx, dy;
+        int i, j;
+
+        for (i = 0; i < grid_size; i++) {
+                queens[i].x = i;
+                queens[i].y = stack[i].next_row - 1;
+        }
+
+        for (i = 0; i < grid_size; i++) {
+                nearest_distance2 = INT_MAX;
+
+                for (j = 0; j < grid_size; j++) {
+                        if (i == j)
+                                continue;
+
+                        dx = queens[i].x - queens[j].x;
+                        dy = queens[i].y - queens[j].y;
+
+                        distance2 = dx * dx + dy * dy;
+
+                        if (distance2 < nearest_distance2)
+                                nearest_distance2 = distance2;
+                }
+
+                total_nearest_distance += sqrtf(nearest_distance2);
+        }
+
+        if (total_nearest_distance > solution_state->total_nearest_distance) {
+                solution_state->total_nearest_distance =
+                        total_nearest_distance;
+                memcpy(solution_state->queens, queens, sizeof queens);
+        }
+}
+
+static void
 search(int grid_size)
 {
         struct stack_entry stack[grid_size];
@@ -148,8 +199,13 @@ search(int grid_size)
         int forward_diagonal;
         int back_diagonal;
         int stack_size = 1;
+        struct solution_state solution_state;
         int x, y;
         int max_row;
+
+        solution_state.total_nearest_distance = -FLT_MAX;
+        solution_state.queens = alloca(sizeof *solution_state.queens *
+                                       grid_size);
 
         stack[0].next_row = 0;
 
@@ -180,8 +236,9 @@ search(int grid_size)
                                        back_diagonal)) {
 
                                 if (stack_size >= grid_size) {
-                                        print_solution(grid_size,
-                                                       stack);
+                                        handle_solution(stack_size,
+                                                        stack,
+                                                        &solution_state);
                                 } else {
                                         set_bit(row_mask, y);
                                         set_bit(forward_diagonal_mask,
@@ -215,6 +272,8 @@ search(int grid_size)
                         reset_bit(back_diagonal_mask, back_diagonal);
                 }
         }
+
+        print_solution(grid_size, solution_state.queens);
 }
 
 int

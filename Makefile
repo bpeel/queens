@@ -11,4 +11,4 @@ OBJS = $(SOURCES:.c=.o)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 queens : $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) -lm
