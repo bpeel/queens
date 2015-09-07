@@ -146,6 +146,7 @@ search(int grid_size)
         int back_diagonal;
         int stack_size = 1;
         int x, y;
+        int max_row;
 
         stack[0].next_row = 0;
 
@@ -157,7 +158,12 @@ search(int grid_size)
                 x = stack_size - 1;
                 y = stack[x].next_row;
 
-                if (y < grid_size) {
+                if (x == grid_size / 2)
+                        max_row = grid_size / 2 + 1;
+                else
+                        max_row = grid_size;
+
+                if (y < max_row) {
                         stack[stack_size - 1].next_row++;
 
                         get_diagonals(grid_size,
@@ -180,7 +186,11 @@ search(int grid_size)
                                         set_bit(back_diagonal_mask,
                                                 back_diagonal);
 
-                                        stack[stack_size].next_row = 0;
+                                        if (stack_size == grid_size / 2)
+                                                stack[stack_size].next_row =
+                                                        grid_size / 2;
+                                        else
+                                                stack[stack_size].next_row = 0;
                                         stack_size++;
                                 }
                         }
