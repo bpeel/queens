@@ -220,7 +220,18 @@ search(int grid_size)
 int
 main(int argc, char **argv)
 {
-        search(8);
+        int sample_count = 8;
+
+        if (argc > 1) {
+                sample_count = atoi(argv[1]);
+                if (sample_count <= 0) {
+                        fprintf(stderr,
+                                "usage: queens [sample_count]\n");
+                        return 1;
+                }
+        }
+
+        search(sample_count);
 
         return 0;
 }
